@@ -1,2 +1,2 @@
-# azure-tf
-Infrastracture for Azure Cloud
+# Infrastructre for Azure Cloud
+
