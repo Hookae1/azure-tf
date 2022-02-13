@@ -1,2 +1,2 @@
-# Infrastructre for Azure Cloud
+# Infrastructure for Azure Cloud
 
