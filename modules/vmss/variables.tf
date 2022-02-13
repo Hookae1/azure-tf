@@ -1,3 +1,17 @@
+variable "image_id" {
+    type                            = string
+    sensitive                      = true
+}
+
+variable "key_vault" {
+    type                            = string
+    sensitive                      = true  
+}
+
+variable "key_name" {
+    type                            = string
+}
+
 variable "rgroup" {
     type                            = object({
         name                        = string
@@ -6,19 +20,21 @@ variable "rgroup" {
 }
 
 variable "vnet" {
-    type                            = string
+    type                            = object({
+        name                        = string
+    })
 }
 
 variable "name" {
-  type                              = string
+    type                            = string
 }
 
-variable "sec_rule" {
-    type                            = object({
+variable "rules" {
+    type                            = map(object({
         name                        = string
         priority                    = number
         destination                 = string
-    }) 
+    })) 
 }
 
 variable "ip" {
@@ -32,45 +48,34 @@ variable "application_port" {
     type                            = number
 }
 
-variable "upgrade_policy" {
-    type                            = string
-}
-
 variable "set" {
-    sku                             = object({
-        name                        = string
-        tier                        = number
-    })
+    type = object({
+        upgrade_policy                  = string
 
-    os                              = object({
-        caching                     = string
-        create_option               = string
-        managed_disk_type           = string
+        sku                             = object({
+            name                        = string
+            tier                        = string
+            capacity                    = number
+        })
+
+        os_disk                         = object({
+            caching                     = string
+            create_option               = string
+            managed_disk_type           = string
+        })
     })
 }
 
 variable "admin_username" {
-    type                            = string
-}
-
-variable "ssh" {
-    type                            = string
-    sensitive                       = true
+    type                                = string
 }
 
 variable "scale" {
-    capa                            = object({
-        minimum                     = number
-        maximum                     = number
+    type                                = object({
+        default                         = number
+        minimum                         = number
+        maximum                         = number
     })
   
 }
 
-variable "mt_rule" {
-    type                            = object({
-        operator                    = string
-        threshold                   = number
-        direction                   = string
-    })
-  
-}
