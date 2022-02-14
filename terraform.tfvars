@@ -44,7 +44,7 @@ ip = {
 application_port                    = "80"
 
 
-set = {
+vmss_set = {
     upgrade_policy                  = "Automatic"
 
     sku = {
@@ -67,3 +67,28 @@ scale   = {
     minimum                         = 1
     maximum                         = 2
 }
+
+jb_ip = {
+    ip_version                      = "IPv4"
+    sku                             = "Standard"
+}
+
+jbkey_name                          = "vm-jumpbox"
+
+jb_set = {
+    vm_size                         = "Standard_B1ms"
+
+    image = {
+        publisher                   = "Canonical"
+        offer                       = "0001-com-ubuntu-server-focal"
+        sku                         = "20_04-lts-gen2"
+        version                     = "latest"
+    }
+
+    os_disk = {
+        caching                     = "ReadWrite"
+        create_option               = "FromImage"
+        managed_disk_type           = "Standard_LRS"
+    }
+}        
+

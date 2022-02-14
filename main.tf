@@ -1,25 +1,3 @@
-terraform {
-  required_version = ">=0.15"
-  
-  required_providers {
-    azurerm = {
-      source = "hashicorp/azurerm"
-      version = "~>2.0"
-    }
-  }
-}
-
-provider "azurerm" {
-
-  features {}
-
-  subscription_id = var.subscription_id
-  client_id       = var.client_id
-  client_secret   = var.client_secret
-  tenant_id       = var.tenant_id
-
-}
-
 module "major" {
   source                                    = "./modules/major"
 
@@ -52,11 +30,29 @@ module "vmss" {
   ip                                        = var.ip
   application_port                          = var.application_port
 
-  set                                       = var.set 
+  set                                       = var.vmss_set 
 
   admin_username                            = var.admin_username
 
   scale                                     = var.scale
 
+}
+
+module "jb" {
+  source                                    = "./modules/jb"
+  depends_on                                = [module.vmss, module.major]
+  
+  jb_ip                                     = var.jb_ip
+  jbkey_name                                = var.jbkey_name
+  key_vault                                 = var.key_vault
+
+  name                                      = var.project
+  rgroup                                    = module.major.rgroup
+  vnet                                      = module.major.vnet
+
+  set                                       = var.jb_set
+
+  admin_username                            = var.admin_username
+                
 }
 

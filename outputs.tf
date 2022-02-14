@@ -10,5 +10,10 @@ output "user_name" {
     value                   = module.vmss.user_name
 }   
 
+output "jb_ip" {
+    value                   = module.jb.public_ip               
+}
 
-
+output "jb_name" {
+    value                   = module.jb.jb_name             
+}
