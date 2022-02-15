@@ -1,14 +1,14 @@
 variable "image_id" {
     type                            = string
-    sensitive                      = true
+    sensitive                       = true
 }
 
 variable "key_vault" {
     type                            = string
-    sensitive                      = true  
+    sensitive                       = true  
 }
 
-variable "key_name" {
+variable "vmss_key" {
     type                            = string
 }
 
@@ -27,6 +27,10 @@ variable "vnet" {
 
 variable "name" {
     type                            = string
+}
+
+variable "vmss_adpref" {
+    type                            = list(string)
 }
 
 variable "rules" {

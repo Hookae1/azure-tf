@@ -12,13 +12,13 @@ output "image" {
 }       
 
 # Fetching SSH-key from Azure Key Vault for vmSS configuration
-data "azurerm_key_vault_key" "ssh_key" {
-  name                                        = var.key_name
+data "azurerm_key_vault_secret" "ssh_key" {
+  name                                        = var.vmss_key
   key_vault_id                                = var.key_vault
 }
 
 output "ssh_key" {
-  value                                       = data.azurerm_key_vault_key.ssh_key.public_key_openssh
+  value                                       = data.azurerm_key_vault_secret.ssh_key.value
   sensitive                                   = true
 }
 
@@ -27,7 +27,7 @@ resource "azurerm_subnet" "vmss" {
   name                                        = "${var.name}-vmss-sub"
   resource_group_name                         = var.rgroup.name
   virtual_network_name                        = var.vnet.name
-  address_prefixes                            = ["10.0.1.0/24"]
+  address_prefixes                            = var.vmss_adpref
 }
 
 resource "azurerm_network_security_group" "public_nsg" {
@@ -51,6 +51,11 @@ resource "azurerm_network_security_group" "public_nsg" {
   }
 }
 
+resource "azurerm_subnet_network_security_group_association" "association" {
+  subnet_id                                   = azurerm_subnet.vmss.id
+  network_security_group_id                   = azurerm_network_security_group.public_nsg.id
+}
+
 resource "azurerm_public_ip" "vmss" {
   name                                        = "${var.name}-vmss-ip"
   resource_group_name                         = var.rgroup.name
@@ -64,7 +69,7 @@ resource "azurerm_lb" "lb" {
   name                                        = "${var.name}-lb"
   location                                    = var.rgroup.location
   resource_group_name                         = var.rgroup.name
-  sku					      = "Standard"
+  sku                                         = "Standard"
 
   depends_on                                  = [azurerm_public_ip.vmss]
 
@@ -76,12 +81,11 @@ resource "azurerm_lb" "lb" {
 
 resource "azurerm_lb_backend_address_pool" "lbback" {
   name                                        = "BackendAdressPool"
-  resource_group_name                         = var.rgroup.name
   loadbalancer_id                             = azurerm_lb.lb.id
 }
 
 resource "azurerm_lb_probe" "probe" {
-  name                                        = "ssh-probe"
+  name                                        = "http-probe"
   resource_group_name                         = var.rgroup.name
   loadbalancer_id                             = azurerm_lb.lb.id
   port                                        = var.application_port
@@ -89,11 +93,10 @@ resource "azurerm_lb_probe" "probe" {
 }
 
 resource "azurerm_lb_rule" "lbrules" {
-
         resource_group_name                   = var.rgroup.name
         loadbalancer_id                       = azurerm_lb.lb.id
         probe_id                              = azurerm_lb_probe.probe.id
-        backend_address_pool_id               = azurerm_lb_backend_address_pool.lbback.id
+#       backend_address_pool_id               = azurerm_lb_backend_address_pool.lbback.id
         frontend_ip_configuration_name        = "FrontEnd"
         name                                  = "${var.application_port}-lbrule"
         protocol                              = "Tcp"
@@ -103,19 +106,7 @@ resource "azurerm_lb_rule" "lbrules" {
         depends_on                            = [azurerm_lb_probe.probe]
 }
 
-/*
-resource "azurerm_lb_outbound_rule" "outbound" {
-  resource_group_name                         = var.rgroup.name
-  loadbalancer_id                             = azurerm_lb.lb.id
-  name                                        = "OutboundRule"
-  protocol                                    = "Tcp"
-  backend_address_pool_id                     = azurerm_lb_backend_address_pool.lbback.id
 
-  frontend_ip_configuration {
-    name                                      = azurerm_lb.lb.frontend_ip_configuration[0].name
-  }
-}
-*/
 
 resource "azurerm_virtual_machine_scale_set" "vmss" {
   name                                        = "${var.name}-vmss"
@@ -131,29 +122,24 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
     capacity                                  = var.set.sku.capacity
   }
 
-
   storage_profile_image_reference {
     id                                        = data.azurerm_shared_image_version.image.id
   }
-
   storage_profile_os_disk {
-  # name                                      = "${var.name}-os-disk"
     caching                                   = var.set.os_disk.caching
     create_option                             = var.set.os_disk.create_option
     managed_disk_type                         = var.set.os_disk.managed_disk_type
   }
-
   os_profile {
     computer_name_prefix                      = "${var.name}-vmss-vm"
     admin_username                            = var.admin_username
   }
-
   os_profile_linux_config {
     disable_password_authentication           = true
 
     ssh_keys {
     path                                      = "/home/${var.admin_username}/.ssh/authorized_keys"
-    key_data                                  = data.azurerm_key_vault_key.ssh_key.public_key_openssh
+    key_data                                  = data.azurerm_key_vault_secret.ssh_key.value
     }
 
   } 

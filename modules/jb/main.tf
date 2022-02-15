@@ -1,30 +1,22 @@
 
 # Fetching SSH-key from Azure Key Vault for vmSS configuration
-data "azurerm_key_vault_key" "jb_key" {
-  name                                              = var.jbkey_name
+data "azurerm_key_vault_secret" "jb_key" {
+  name                                              = var.jb_key
   key_vault_id                                      = var.key_vault
 }
 
-output "ssh_key" {
-  value                                             = data.azurerm_key_vault_key.jb_key.public_key_openssh
+output "jb_key" {
+  value                                             = data.azurerm_key_vault_secret.jb_key
   sensitive                                         = true
-}
-
-resource "azurerm_subnet" "jumpbox" {
-  name                                              = "${var.name}-jb-sub"
-  resource_group_name                        	    = var.rgroup.name
-  virtual_network_name                       	    = var.vnet.name
-  address_prefixes                           	    = ["10.0.2.0/24"]
 }
 
 resource "azurerm_public_ip" "jumpbox" {
   name                                              = "${var.name}-jb-ip"
   location                                          = var.rgroup.location
   resource_group_name                               = var.rgroup.name
-  allocation_method				    = "Static"
+  allocation_method                                 = var.jb_ip.allocation_method
   ip_version                                        = var.jb_ip.ip_version
   sku                                               = var.jb_ip.sku
-# domain_name_label                                 = "${random_string.fqdn.result}-ssh"
 }
 
 resource "azurerm_network_security_group" "jumpbox" {
@@ -45,7 +37,6 @@ resource "azurerm_network_security_group" "jumpbox" {
     }
 }
 
-
 resource "azurerm_network_interface" "jumpbox" {
   name                                              = "${var.name}-jb-nic"
   location                                          = var.rgroup.location
@@ -53,11 +44,16 @@ resource "azurerm_network_interface" "jumpbox" {
 
   ip_configuration {
     name                                            = "IPConfiguration"
-    subnet_id                                       = azurerm_subnet.jumpbox.id
-    private_ip_address_allocation                   = "dynamic"
+    subnet_id                                       = var.subnet.id
+    private_ip_address_allocation                   = var.ip_allocation
     public_ip_address_id                            = azurerm_public_ip.jumpbox.id
   }
+    depends_on                                      = [azurerm_network_security_group.jumpbox]
+}
 
+resource "azurerm_network_interface_security_group_association" "association" {
+  network_interface_id                              = azurerm_network_interface.jumpbox.id
+  network_security_group_id                         = azurerm_network_security_group.jumpbox.id
 }
 
 resource "azurerm_virtual_machine" "jumpbox" {
@@ -91,8 +87,8 @@ resource "azurerm_virtual_machine" "jumpbox" {
 
     ssh_keys {
       path                                          = "/home/${var.admin_username}/.ssh/authorized_keys"
-      key_data                                      = data.azurerm_key_vault_key.jb_key.public_key_openssh
+      key_data                                      = data.azurerm_key_vault_secret.jb_key.value
     }
   }
-
+   depends_on                                       = [azurerm_network_interface.jumpbox]
 }

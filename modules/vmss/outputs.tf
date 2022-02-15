@@ -10,6 +10,10 @@ output "vmss_name" {
     value                   = azurerm_virtual_machine_scale_set.vmss.name
 }
 
-output "key_name" {
-    value                   = var.key_name
+output "vmss_key" {
+    value                   = var.vmss_key
+}
+
+output "subnet" {
+    value                   = azurerm_subnet.vmss          
 }

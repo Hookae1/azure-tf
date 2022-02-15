@@ -1,10 +1,20 @@
-variable "jbkey_name" {
+variable "jb_key" {
     type                            = string     
 }
 
 variable "key_vault" {
     type                            = string
     sensitive                       = true       
+}
+
+variable "subnet" {
+    type                            = object({
+        id                          = string
+    })
+}
+
+variable "ip_allocation" {
+    type                            = string      
 }
 
 variable "rgroup" {
@@ -16,6 +26,7 @@ variable "rgroup" {
 
 variable "jb_ip" {
     type                            = object({
+        allocation_method           = string
         ip_version                  = string
         sku                         = string
     }) 

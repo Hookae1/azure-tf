@@ -1,3 +1,6 @@
+output "fqdn" {
+   value                    = module.db.fqdn
+}
 output "vmss_name" {
    value                    = module.vmss.vmss_name
 }       
@@ -16,4 +19,9 @@ output "jb_ip" {
 
 output "jb_name" {
     value                   = module.jb.jb_name             
+}
+
+output "db_user" {
+    value                   = module.db.mysql_user
+    sensitive	 	    = true
 }

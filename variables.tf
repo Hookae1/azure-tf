@@ -1,39 +1,99 @@
 
-# Service Principal data
+#=================== Service Principal Data =================== #
 variable "subscription_id" {
-    type                                 = string
-    sensitive                            = true                 
+type                                    = string
+sensitive                               = true                 
 }
 
 variable "client_id" {
-    type                                 = string
-    sensitive                            = true                 
+type                                    = string
+sensitive                               = true                 
 }
 
 variable "client_secret" {
-    type                                 = string
-    sensitive                            = true                 
+type                                    = string
+sensitive                               = true                 
 }
 
 variable "tenant_id" {
-    type                                 = string
-    sensitive                            = true                 
+type                                    = string
+sensitive                               = true                 
 }
 
 
-# General configuration
+#========================== Generall ========================= #
 variable "resource_group" {
-    type                                 = object({
-        name                             = string
-        location                         = string
+type                                    = object({
+    name                                = string
+    location                            = string
     })     
 }
 
 variable "project" {
-    type                                 = string
+type                                    = string
 }
 
-# LB + vmSS
+variable "admin_username" {
+type                                    = string
+}
+
+variable "storage_name" {
+    type                                = string
+}
+
+variable "container_name" {
+    type                                = string  
+}
+
+variable "access_key" {
+    type                                = string  
+}
+
+
+#=========================== MySQL =========================== #
+variable "mysql_fqdn" {
+    type                                = object({
+       length                           = number
+       special                          = bool
+       upper                            = bool
+       number                           = bool
+    })        
+}
+
+variable "mysql_adpref" {
+    type                                = list(string)
+} 
+
+variable "backup_retention_days" {
+    type                                = number      
+}
+
+variable "sku_name" {
+    type                                = string
+}
+
+variable "db_version" {
+    type                                = string
+}
+
+variable "db_user" {
+    type                                = string  
+}
+
+variable "db_pass" {
+    type                                = string
+    sensitive                           = true 
+}
+
+variable "charset" {
+    type                                = string    
+}
+
+variable "collation" {
+    type                                = string        
+}
+
+#========================= LB + vmSS ========================= #
 variable "image_id" {
     type                                 = string
     sensitive                            = true
@@ -44,8 +104,12 @@ variable "key_vault" {
     sensitive                           = true  
 }
 
-variable "key_name" {
+variable "vmss_key" {
     type                                = string
+}
+
+variable "vmss_adpref" {
+    type                                = list(string)
 }
 
 variable "rules" {
@@ -61,15 +125,6 @@ variable "ip" {
         version                         = string
         sku                             = string
     })                         
-}
-
-variable "application_port" {
-    type                                = number
-}
-
-variable "jbkey_name" {
-    type                                = string
-     
 }
 
 variable "vmss_set" {
@@ -90,10 +145,6 @@ variable "vmss_set" {
     }) 
 }
 
-variable "admin_username" {
-    type                                = string
-}
-
 variable "scale" {
     type                                = object({
         default                         = number
@@ -102,13 +153,25 @@ variable "scale" {
     })
 }
 
-# Jumpbox
+#=========================== Jumpbox =========================== #
+variable "jb_key" {
+    type                                = string 
+}
 
 variable "jb_ip" {
     type                                = object({
+        allocation_method               = string
         ip_version                      = string
         sku                             = string
     })      
+}
+
+variable "ip_allocation" {
+    type                                = string      
+}
+
+variable "application_port" {
+    type                                = number
 }
 
 variable "jb_set" {
