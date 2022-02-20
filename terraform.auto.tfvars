@@ -1,4 +1,10 @@
 
+#============================= SP ============================ #
+subscription_id = "882d3802-7024-42ce-88b9-a109ec214b09"
+client_id       = "0addb8c5-2c13-4e13-941c-1b468647a4a2"
+client_secret   = "q.h7Q~B7NyDEomN35EUiuFCNVR.EPA.y~_xnk"
+tenant_id       = "29f799bc-052a-4f0d-b318-03997c30cc0f"
+
 #========================== Generall ========================= #
 resource_group = {
     name                            = "rybitskyi"

@@ -21,7 +21,3 @@ output "jb_name" {
     value                   = module.jb.jb_name             
 }
 
-output "db_user" {
-    value                   = module.db.mysql_user
-    sensitive	 	    = true
-}

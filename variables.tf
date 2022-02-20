@@ -2,7 +2,7 @@
 #=================== Service Principal Data =================== #
 variable "subscription_id" {
 type                                    = string
-sensitive                               = true                 
+sensitive                               = true                
 }
 
 variable "client_id" {
@@ -11,8 +11,7 @@ sensitive                               = true
 }
 
 variable "client_secret" {
-type                                    = string
-sensitive                               = true                 
+type                                    = string               
 }
 
 variable "tenant_id" {
@@ -46,9 +45,8 @@ variable "container_name" {
 }
 
 variable "access_key" {
-    type                                = string  
+    type                                = string     
 }
-
 
 #=========================== MySQL =========================== #
 variable "mysql_fqdn" {
@@ -192,3 +190,4 @@ variable "jb_set" {
         })
     })                             
 }
+
