@@ -84,7 +84,7 @@ stages:
         ManageState: false
 
 # Approve for Deploy
-- stage: Approve for Deploy
+- stage: ApproveDeploy
   displayName: Approve for Deploy
   jobs:
   - job: approve
@@ -142,7 +142,7 @@ stages:
         ManageState: false
 
 # Approve for Destroy
-- stage: Approve for Destroy
+- stage: ApproveDestroy
   displayName: Approve for Destroy
   jobs:
   - job: approve
