@@ -34,12 +34,8 @@ stages:
           Version: '1.1.5'
           UseAzureSub: true
           ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
-          ConnectedServiceNameARM: $(subscription_id)
-          ManageState: true
-          SpecifyStorageAccount: true
-          StorageAccountResourceGroup: $(rgroup_name)
-          StorageAccountRM: $(account_name)
-          StorageContainerName: $(container_name)
+          ConnectedServiceNameARM: '$(subscription_id)'
+          ManageState: false
 
 # Plan
 - stage: Plan
