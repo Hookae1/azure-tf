@@ -1,13 +1,25 @@
+variables:
+- group: Azure Data
+- group: Azure Key Vault
+
+
 trigger: none
 
 pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: TerraformInstaller@0
+  displayName: install Terraform v0.12.28
+  inputs:
+    terraformVersion: 'latest'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: Terraform@2
+  inputs:
+    TemplatePath: '$(System.DefaultWorkingDirectory)/_Terraform-deploy/terraform'
+    Arguments: 'init'
+    InstallTerraform: true
+    UseAzureSub: true
+    ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+    ConnectedServiceNameARM: 'Azure subscription 1(882d3802-7024-42ce-88b9-a109ec214b09)'
+    ManageState: false
