@@ -69,6 +69,7 @@ resource "azurerm_mysql_flexible_server" "mysql" {
   private_dns_zone_id                     = azurerm_private_dns_zone.mysql_dns.id
   sku_name                                = var.sku_name
   version                                 = var.mysql_version 
+  zone					  = "1"  
 
   depends_on                              = [azurerm_private_dns_zone_virtual_network_link.mysql_link]
 }
