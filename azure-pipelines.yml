@@ -13,12 +13,12 @@ stages:
   jobs:
     - job: validate
       pool:
-        vmImage: ubuntu-latest
+        vmImage: windows-latest
 
       steps:
       - task: TerraformInstaller@0
         inputs:
-          terraformVersion: 'latest'
+          terraformVersion: '1.1.5'
 
       - task: AzureKeyVault@2
         inputs:
@@ -26,19 +26,17 @@ stages:
           KeyVaultName: $(azure_key_vault)
           SecretsFilter: '*'
           RunAsPreJob: false
-
-      - task: TerraformCLI@0
+      - task: Terraform@2
         displayName: Initialize Terraform
         inputs:
-          command: 'init'
-          backendType: 'selfConfigured'
-          allowTelemetryCollection: true
-
-      - task: TerraformCLI@0
-        displayName: Validate of Terraform config
-        inputs:
-          command: 'validate'
-          allowTelemetryCollection: true
+          TemplatePath: '$(System.DefaultWorkingDirectory)'
+          Arguments: 'init'
+          InstallTerraform: true
+          Version: '1.1.5'
+          UseAzureSub: true
+          ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+          ConnectedServiceNameARM: '$(subscription_id)'
+          ManageState: false
 
 # Plan
 - stage: Plan
@@ -46,13 +44,13 @@ stages:
   jobs:
   - job: plan
     pool:
-      vmImage: ubuntu-latest
+      vmImage: windows-latest
 
     steps:
     - task: TerraformInstaller@0
       displayName: Install Terraform
       inputs:
-        terraformVersion: 'latest'
+        terraformVersion: '1.1.5'
 
     - task: AzureKeyVault@2
       inputs:
@@ -61,30 +59,33 @@ stages:
         SecretsFilter: '*'
         RunAsPreJob: false
 
-    - task: TerraformCLI@0
+    - task: Terraform@2
       displayName: Initialize Terraform
       inputs:
-        command: 'init'
-        backendType: 'azurerm'
-        allowTelemetryCollection: true
+        TemplatePath: '$(System.DefaultWorkingDirectory)'
+        Arguments: 'init'
+        InstallTerraform: true
+        Version: '1.1.5'
+        UseAzureSub: true
+        ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+        ConnectedServiceNameARM: '$(subscription_id)'
+        ManageState: false
 
-    - task: TerraformCLI@0
+    - task: Terraform@2
       displayName: Plan Terraform Deployment
-      env:
-        ARM_CLIENT_ID: $(clientID)
-        ARM_CLIENT_SECRET: $(clientsecret)
-        ARM_SUBSCRIPTION_ID: $(subscription_id)
-        ARM_TENANT_ID: $(tenantID)
       inputs:
-        command: 'plan'
-        environmentServiceName: '$(subscription_id)'
-        runAzLogin: true
-        allowTelemetryCollection: true
-        commandOptions: '-out=tfplan'
+        TemplatePath: '$(System.DefaultWorkingDirectory)'
+        Arguments: 'plan -out=tfplan'
+        InstallTerraform: true
+        Version: '1.1.5'
+        UseAzureSub: true
+        ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+        ConnectedServiceNameARM: '$(subscription_id)'
+        ManageState: false
 
-# Approve
-- stage: Approve
-  displayName: Approve
+# Approve for Deploy
+- stage: ApproveDeploy
+  displayName: Approve for Deploy
   jobs:
   - job: approve
     displayName: Wait for approval
@@ -93,7 +94,7 @@ stages:
     - task: ManualValidation@0
       timeoutInMinutes: 30
       inputs:
-        notifyUsers: 'rybitskyi@outlook.com'
+        notifyUsers: 'rybitskyiy@outlook.com'
         instructions: 'Review the plan in the next hour'
 
 # Apply        
@@ -102,12 +103,12 @@ stages:
   jobs:
   - job: apply
     pool:
-      vmImage: ubuntu-latest
+      vmImage: windows-latest
     steps:
     - task: TerraformInstaller@0
       displayName: Install Terraform
       inputs:
-        terraformVersion: 'latest'
+        terraformVersion: '1.1.5'
 
     - task: AzureKeyVault@2
       inputs:
@@ -116,23 +117,64 @@ stages:
         SecretsFilter: '*'
         RunAsPreJob: false
 
-    - task: TerraformCLI@0
+    - task: Terraform@2
       displayName: Initialize Terraform
       inputs:
-        command: 'init'
-        backendType: 'azurerm'
-        allowTelemetryCollection: true
+        TemplatePath: '$(System.DefaultWorkingDirectory)'
+        Arguments: 'init'
+        InstallTerraform: true
+        Version: '1.1.5'
+        UseAzureSub: true
+        ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+        ConnectedServiceNameARM: '$(subscription_id)'
+        ManageState: false
 
-    - task: TerraformCLI@0
-      displayName: Apply Terraform Deployment
-      env:
-        ARM_CLIENT_ID: $(clientID)
-        ARM_CLIENT_SECRET: $(clientsecret)
-        ARM_SUBSCRIPTION_ID: $(subscription_id)
-        ARM_TENANT_ID: $(tenantID)
+    - task: Terraform@2
+      displayName: Apply Terraform Deploy
       inputs:
-        command: 'apply'
-        environmentServiceName: '$(subscription_id)'
-        runAzLogin: true
-        allowTelemetryCollection: true
-        commandOptions: '-auto-approve'
+        TemplatePath: '$(System.DefaultWorkingDirectory)'
+        Arguments: 'apply -auto-approve'
+        InstallTerraform: true
+        Version: '1.1.5'
+        UseAzureSub: true
+        ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+        ConnectedServiceNameARM: '$(subscription_id)'
+        ManageState: false
+
+# Approve for Destroy
+- stage: ApproveDestroy
+  displayName: Approve for Destroy
+  jobs:
+  - job: approve
+    displayName: Wait for approval
+    pool: server
+    steps: 
+    - task: ManualValidation@0
+      timeoutInMinutes: 120
+      inputs:
+        notifyUsers: 'rybitskyiy@outlook.com'
+        instructions: 'Review the plan in the next 2 hours'
+
+# Destroy        
+- stage: Destroy
+  displayName: Destroy
+  jobs:
+  - job: destroy
+    pool:
+      vmImage: windows-latest
+    steps:
+    - task: TerraformInstaller@0
+      displayName: Install Terraform
+      inputs:
+        terraformVersion: '1.1.5'
+    - task: Terraform@2
+      displayName: Destroy Infrastructure
+      inputs:
+        TemplatePath: '$(System.DefaultWorkingDirectory)'
+        Arguments: 'destroy -auto-approve'
+        InstallTerraform: true
+        Version: '1.1.5'
+        UseAzureSub: true
+        ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+        ConnectedServiceNameARM: '$(subscription_id)'
+        ManageState: false
