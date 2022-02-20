@@ -18,7 +18,7 @@ stages:
       steps:
       - task: TerraformInstaller@0
         inputs:
-          terraformVersion: 'latest'
+          terraformVersion: '1.1.5'
 
       - task: AzureKeyVault@2
         inputs:
@@ -26,18 +26,20 @@ stages:
           KeyVaultName: $(azure_key_vault)
           SecretsFilter: '*'
           RunAsPreJob: false
-
-      - task: TerraformCLI@0
-        displayName: Initialize Terraform
+      - task: Terraform@2
         inputs:
-          command: 'init'
-          allowTelemetryCollection: true
-
-      - task: TerraformCLI@0
-        displayName: Validate of Terraform config
-        inputs:
-          command: 'validate'
-          allowTelemetryCollection: true
+          TemplatePath: '$(System.DefaultWorkingDirectory)'
+          Arguments: 'init'
+          InstallTerraform: true
+          Version: '1.1.5'
+          UseAzureSub: true
+          ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+          ConnectedServiceNameARM: $(subscription_id)
+          ManageState: true
+          SpecifyStorageAccount: true
+          StorageAccountResourceGroup: $(rgroup_name)
+          StorageAccountRM: $(account_name)
+          StorageContainerName: $(container_name)
 
 # Plan
 - stage: Plan
@@ -51,7 +53,7 @@ stages:
     - task: TerraformInstaller@0
       displayName: Install Terraform
       inputs:
-        terraformVersion: 'latest'
+        terraformVersion: '1.1.5'
 
     - task: AzureKeyVault@2
       inputs:
@@ -106,7 +108,7 @@ stages:
     - task: TerraformInstaller@0
       displayName: Install Terraform
       inputs:
-        terraformVersion: 'latest'
+        terraformVersion: '1.1.5'
 
     - task: AzureKeyVault@2
       inputs:
