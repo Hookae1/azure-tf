@@ -83,7 +83,7 @@ stages:
         ConnectedServiceNameARM: '$(subscription_id)'
         ManageState: false
 
-# Approve
+# Approve for Deploy
 - stage: Approve
   displayName: Approve
   jobs:
@@ -94,7 +94,7 @@ stages:
     - task: ManualValidation@0
       timeoutInMinutes: 30
       inputs:
-        notifyUsers: 'rybitskyi@outlook.com'
+        notifyUsers: 'rybitskyiy@outlook.com'
         instructions: 'Review the plan in the next hour'
 
 # Apply        
@@ -134,6 +134,44 @@ stages:
       inputs:
         TemplatePath: '$(System.DefaultWorkingDirectory)'
         Arguments: 'apply -auto-approve'
+        InstallTerraform: true
+        Version: '1.1.5'
+        UseAzureSub: true
+        ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+        ConnectedServiceNameARM: '$(subscription_id)'
+        ManageState: false
+
+# Approve for Destroy
+- stage: Destroy
+  displayName: Destroy
+  jobs:
+  - job: destroy
+    displayName: Wait for approval
+    pool: server
+    steps: 
+    - task: ManualValidation@0
+      timeoutInMinutes: 120
+      inputs:
+        notifyUsers: 'rybitskyiy@outlook.com'
+        instructions: 'Review the plan in the next hour'
+
+# Destroy        
+- stage: Apply
+  displayName: Apply
+  jobs:
+  - job: apply
+    pool:
+      vmImage: windows-latest
+    steps:
+    - task: TerraformInstaller@0
+      displayName: Install Terraform
+      inputs:
+        terraformVersion: '1.1.5'
+    - task: Terraform@2
+      displayName: Destroy Infrastructure
+      inputs:
+        TemplatePath: '$(System.DefaultWorkingDirectory)'
+        Arguments: 'destroy -auto-approve'
         InstallTerraform: true
         Version: '1.1.5'
         UseAzureSub: true
