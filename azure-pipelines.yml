@@ -141,6 +141,12 @@ stages:
         ConnectedServiceNameARM: '$(subscription_id)'
         ManageState: false
 
+    - task: terraform-outputs@0
+      inputs:
+        workingDirectory: '$(System.DefaultWorkingDirectory)'
+        mapSensitiveOutputsAsSecrets: true
+        variablePrefix: 'TF'
+
 # Approve for Destroy
 - stage: ApproveDestroy
   displayName: Approve for Destroy
