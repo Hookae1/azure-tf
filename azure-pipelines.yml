@@ -27,6 +27,7 @@ stages:
           SecretsFilter: '*'
           RunAsPreJob: false
       - task: Terraform@2
+        displayName: Initialize Terraform
         inputs:
           TemplatePath: '$(System.DefaultWorkingDirectory)'
           Arguments: 'init'
@@ -58,26 +59,29 @@ stages:
         SecretsFilter: '*'
         RunAsPreJob: false
 
-    - task: TerraformCLI@0
+    - task: Terraform@2
       displayName: Initialize Terraform
       inputs:
-        command: 'init'
-        backendType: 'azurerm'
-        allowTelemetryCollection: true
+        TemplatePath: '$(System.DefaultWorkingDirectory)'
+        Arguments: 'init'
+        InstallTerraform: true
+        Version: '1.1.5'
+        UseAzureSub: true
+        ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+        ConnectedServiceNameARM: '$(subscription_id)'
+        ManageState: false
 
-    - task: TerraformCLI@0
+    - task: Terraform@2
       displayName: Plan Terraform Deployment
-      env:
-        ARM_CLIENT_ID: $(clientID)
-        ARM_CLIENT_SECRET: $(clientsecret)
-        ARM_SUBSCRIPTION_ID: $(subscription_id)
-        ARM_TENANT_ID: $(tenantID)
       inputs:
-        command: 'plan'
-        environmentServiceName: '$(subscription_id)'
-        runAzLogin: true
-        allowTelemetryCollection: true
-        commandOptions: '-out=tfplan'
+        TemplatePath: '$(System.DefaultWorkingDirectory)'
+        Arguments: 'plan -out=tfplan'
+        InstallTerraform: true
+        Version: '1.1.5'
+        UseAzureSub: true
+        ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+        ConnectedServiceNameARM: '$(subscription_id)'
+        ManageState: false
 
 # Approve
 - stage: Approve
@@ -113,23 +117,26 @@ stages:
         SecretsFilter: '*'
         RunAsPreJob: false
 
-    - task: TerraformCLI@0
+    - task: Terraform@2
       displayName: Initialize Terraform
       inputs:
-        command: 'init'
-        backendType: 'azurerm'
-        allowTelemetryCollection: true
+        TemplatePath: '$(System.DefaultWorkingDirectory)'
+        Arguments: 'init'
+        InstallTerraform: true
+        Version: '1.1.5'
+        UseAzureSub: true
+        ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+        ConnectedServiceNameARM: '$(subscription_id)'
+        ManageState: false
 
-    - task: TerraformCLI@0
-      displayName: Apply Terraform Deployment
-      env:
-        ARM_CLIENT_ID: $(clientID)
-        ARM_CLIENT_SECRET: $(clientsecret)
-        ARM_SUBSCRIPTION_ID: $(subscription_id)
-        ARM_TENANT_ID: $(tenantID)
+    - task: Terraform@2
+      displayName: Apply Terraform Deploy
       inputs:
-        command: 'apply'
-        environmentServiceName: '$(subscription_id)'
-        runAzLogin: true
-        allowTelemetryCollection: true
-        commandOptions: '-auto-approve'
+        TemplatePath: '$(System.DefaultWorkingDirectory)'
+        Arguments: 'apply -auto-approve'
+        InstallTerraform: true
+        Version: '1.1.5'
+        UseAzureSub: true
+        ConnectedServiceNameSelector: 'ConnectedServiceNameARM'
+        ConnectedServiceNameARM: '$(subscription_id)'
+        ManageState: false
