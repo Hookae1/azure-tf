@@ -31,7 +31,6 @@ stages:
         displayName: Initialize Terraform
         inputs:
           command: 'init'
-          backendType: 'selfConfigured'
           allowTelemetryCollection: true
 
       - task: TerraformCLI@0
