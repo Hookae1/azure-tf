@@ -60,23 +60,27 @@ stages:
         KeyVaultName: $(azure_key_vault)
         SecretsFilter: '*'
         RunAsPreJob: false
+
     - task: TerraformCLI@0
       displayName: Initialize Terraform
       inputs:
         command: 'init'
         backendType: 'azurerm'
         allowTelemetryCollection: true
+
     - task: TerraformCLI@0
       displayName: Plan Terraform Deployment
       env:
         ARM_CLIENT_ID: $(clientID)
         ARM_CLIENT_SECRET: $(clientsecret)
-        ARM_SUBSCRIPTION_ID: $(subscription_id])
+        ARM_SUBSCRIPTION_ID: $(subscription_id)
         ARM_TENANT_ID: $(tenantID)
       inputs:
         command: 'plan'
-        environmentServiceName: $(subscription_id)
+        environmentServiceName: '$(subscription_id)'
+        runAzLogin: true
         allowTelemetryCollection: true
+        commandOptions: '-out=tfplan'
 
 # Approve
 - stage: Approve
@@ -87,7 +91,48 @@ stages:
     pool: server
     steps: 
     - task: ManualValidation@0
-      timeoutInMinutes: 60
+      timeoutInMinutes: 30
       inputs:
-        notifyUsers: 'ned@nedinthecloud.com'
+        notifyUsers: 'rybitskyi@outlook.com'
         instructions: 'Review the plan in the next hour'
+
+# Apply        
+- stage: Apply
+  displayName: Apply
+  jobs:
+  - job: apply
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: TerraformInstaller@0
+      displayName: Install Terraform
+      inputs:
+        terraformVersion: 'latest'
+
+    - task: AzureKeyVault@2
+      inputs:
+        azureSubscription: $(subscription_id)
+        KeyVaultName: $(azure_key_vault)
+        SecretsFilter: '*'
+        RunAsPreJob: false
+
+    - task: TerraformCLI@0
+      displayName: Initialize Terraform
+      inputs:
+        command: 'init'
+        backendType: 'azurerm'
+        allowTelemetryCollection: true
+
+    - task: TerraformCLI@0
+      displayName: Apply Terraform Deployment
+      env:
+        ARM_CLIENT_ID: $(clientID)
+        ARM_CLIENT_SECRET: $(clientsecret)
+        ARM_SUBSCRIPTION_ID: $(subscription_id)
+        ARM_TENANT_ID: $(tenantID)
+      inputs:
+        command: 'apply'
+        environmentServiceName: '$(subscription_id)'
+        runAzLogin: true
+        allowTelemetryCollection: true
+        commandOptions: '-auto-approve'
