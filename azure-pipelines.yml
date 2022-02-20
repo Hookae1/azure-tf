@@ -44,7 +44,7 @@ stages:
   jobs:
   - job: plan
     pool:
-      vmImage: ubuntu-latest
+      vmImage: windows-latest
 
     steps:
     - task: TerraformInstaller@0
@@ -103,7 +103,7 @@ stages:
   jobs:
   - job: apply
     pool:
-      vmImage: ubuntu-latest
+      vmImage: windows-latest
     steps:
     - task: TerraformInstaller@0
       displayName: Install Terraform
