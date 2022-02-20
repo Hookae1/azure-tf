@@ -156,10 +156,10 @@ stages:
         instructions: 'Review the plan in the next hour'
 
 # Destroy        
-- stage: Apply
-  displayName: Apply
+- stage: Destroy
+  displayName: Destroy
   jobs:
-  - job: apply
+  - job: destroy
     pool:
       vmImage: windows-latest
     steps:
