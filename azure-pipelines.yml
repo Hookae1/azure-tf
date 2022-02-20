@@ -31,7 +31,7 @@ stages:
         displayName: Initialize Terraform
         inputs:
           command: 'init'
-          backendType: 'azurerm'
+          backendType: 'selfConfigured'
           allowTelemetryCollection: true
 
       - task: TerraformCLI@0
