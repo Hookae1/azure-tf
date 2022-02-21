@@ -73,6 +73,11 @@ stages:
 
     - task: Terraform@2
       displayName: Plan Terraform Deployment
+      env:
+        ARM_CLIENT_ID: $(clientID)
+        ARM_CLIENT_SECRET: $(clientsecret)
+        ARM_SUBSCRIPTION_ID: $(subscriptionID)
+        ARM_TENANT_ID: $(tenantID)
       inputs:
         TemplatePath: '$(System.DefaultWorkingDirectory)'
         Arguments: 'plan -out=tfplan'
@@ -131,6 +136,11 @@ stages:
 
     - task: Terraform@2
       displayName: Apply Terraform Deploy
+      env:
+        ARM_CLIENT_ID: $(clientID)
+        ARM_CLIENT_SECRET: $(clientsecret)
+        ARM_SUBSCRIPTION_ID: $(subscriptionID)
+        ARM_TENANT_ID: $(tenantID)
       inputs:
         TemplatePath: '$(System.DefaultWorkingDirectory)'
         Arguments: 'apply -auto-approve'
@@ -180,6 +190,11 @@ stages:
         ManageState: false
     - task: Terraform@2
       displayName: Destroy Infrastructure
+      env:
+        ARM_CLIENT_ID: $(clientID)
+        ARM_CLIENT_SECRET: $(clientsecret)
+        ARM_SUBSCRIPTION_ID: $(subscriptionID)
+        ARM_TENANT_ID: $(tenantID)
       inputs:
         TemplatePath: '$(System.DefaultWorkingDirectory)'
         Arguments: 'destroy -auto-approve'
